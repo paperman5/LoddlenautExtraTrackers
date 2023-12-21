@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net46</TargetFramework>
+    <TargetFramework>net471</TargetFramework>
     <AssemblyName>GlobalGoopTracker</AssemblyName>
     <Description>My first plugin</Description>
     <Version>1.0.0</Version>
@@ -30,11 +30,17 @@
     <Reference Include="Assembly-CSharp">
       <HintPath>lib\Assembly-CSharp-publicized.dll</HintPath>
     </Reference>
+    <Reference Include="Autodesk.Fbx">
+      <HintPath>lib\Autodesk.Fbx-publicized.dll</HintPath>
+    </Reference>
     <Reference Include="BoingKit">
       <HintPath>lib\BoingKit-publicized.dll</HintPath>
     </Reference>
     <Reference Include="Cinemachine">
       <HintPath>lib\Cinemachine-publicized.dll</HintPath>
+    </Reference>
+    <Reference Include="CW.Common">
+      <HintPath>lib\CW.Common-publicized.dll</HintPath>
     </Reference>
     <Reference Include="DemiLib">
       <HintPath>lib\DemiLib-publicized.dll</HintPath>
@@ -45,8 +51,66 @@
     <Reference Include="DOTweenPro">
       <HintPath>lib\DOTweenPro-publicized.dll</HintPath>
     </Reference>
+    <Reference Include="Dreamteck.Splines">
+      <HintPath>lib\Dreamteck.Splines-publicized.dll</HintPath>
+    </Reference>
+    <Reference Include="Dreamteck.Utilities">
+      <HintPath>lib\Dreamteck.Utilities-publicized.dll</HintPath>
+    </Reference>
+    <Reference Include="FbxBuildTestAssets">
+      <HintPath>lib\FbxBuildTestAssets-publicized.dll</HintPath>
+    </Reference>
+    <Reference Include="Febucci.Attributes.Runtime">
+      <HintPath>lib\Febucci.Attributes.Runtime-publicized.dll</HintPath>
+    </Reference>
+    <Reference Include="Febucci.TextAnimator.Demo.Runtime">
+      <HintPath>lib\Febucci.TextAnimator.Demo.Runtime-publicized.dll</HintPath>
+    </Reference>
+    <Reference Include="Febucci.TextAnimator.Runtime">
+      <HintPath>lib\Febucci.TextAnimator.Runtime-publicized.dll</HintPath>
+    </Reference>
+    <Reference Include="Febucci.TextAnimator.TMP.Runtime">
+      <HintPath>lib\Febucci.TextAnimator.TMP.Runtime-publicized.dll</HintPath>
+    </Reference>
+    <Reference Include="FileBasedPrefs">
+      <HintPath>lib\FileBasedPrefs-publicized.dll</HintPath>
+    </Reference>
+    <Reference Include="FMODUnity">
+      <HintPath>lib\FMODUnity-publicized.dll</HintPath>
+    </Reference>
+    <Reference Include="FMODUnityResonance">
+      <HintPath>lib\FMODUnityResonance-publicized.dll</HintPath>
+    </Reference>
     <Reference Include="GPUInstancer">
       <HintPath>lib\GPUInstancer-publicized.dll</HintPath>
     </Reference>
+    <Reference Include="I2.Localization.Runtime">
+      <HintPath>lib\I2.Localization.Runtime-publicized.dll</HintPath>
+    </Reference>
+    <Reference Include="iGameAudio.FMODWrapper">
+      <HintPath>lib\iGameAudio.FMODWrapper-publicized.dll</HintPath>
+    </Reference>
+    <Reference Include="iGameAudio.Shared">
+      <HintPath>lib\iGameAudio.Shared-publicized.dll</HintPath>
+    </Reference>
+    <Reference Include="Sirenix.OdinInspector.Attributes">
+      <HintPath>lib\Sirenix.OdinInspector.Attributes-publicized.dll</HintPath>
+    </Reference>
+    <Reference Include="Sirenix.OdinInspector.CompatibilityLayer">
+      <HintPath>lib\Sirenix.OdinInspector.CompatibilityLayer-publicized.dll</HintPath>
+    </Reference>
+    <Reference Include="Sirenix.Serialization">
+      <HintPath>lib\Sirenix.Serialization-publicized.dll</HintPath>
+    </Reference>
+    <Reference Include="Sirenix.Serialization.Config">
+      <HintPath>lib\Sirenix.Serialization.Config-publicized.dll</HintPath>
+    </Reference>
+    <Reference Include="Sirenix.Utilities">
+      <HintPath>lib\Sirenix.Utilities-publicized.dll</HintPath>
+    </Reference>
   </ItemGroup>
+  
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+    <Exec Command="mkdir &quot;D:\SteamLibrary\steamapps\common\Loddlenaut\BepInEx\plugins\$(TargetName)&quot;&#xD;&#xA;copy /Y &quot;$(TargetPath)&quot; &quot;D:\SteamLibrary\steamapps\common\Loddlenaut\BepInEx\plugins\$(TargetName)&quot;" />
+  </Target>
 </Project>

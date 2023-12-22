@@ -13,9 +13,9 @@ namespace GlobalGoopTracker
     [BepInPlugin(myGUID, pluginName, versionString)]
     public class GlobalGoopTrackerPlugin : BaseUnityPlugin
     {
-        private const string myGUID = "com.paperish.globalgooptracker";
-        private const string pluginName = "Global Goop Tracker";
-        private const string versionString = "1.0.0";
+        public const string myGUID = "com.paperish.globalgooptracker";
+        public const string pluginName = "Global Goop Tracker";
+        public const string versionString = "1.0.0";
 
         private static readonly Harmony harmony = new Harmony(myGUID);
         private void Awake()

@@ -1,5 +1,6 @@
 ﻿using HarmonyLib;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -15,6 +16,14 @@ namespace GlobalGoopTracker
         public static int waitFrame = 0;
         public static int waitFrameTrigger = 2;
 
+        public static IEnumerator RegisterContaminantsCoroutine(BiomeManager __instance)
+        {
+            yield return new WaitForSeconds(0.1f);
+            __instance.UpdateBiomeTracking();
+            __instance.externalPollutionUpdateQueued = true;
+            GlobalGoopTrackerMod.log.LogInfo("Non-biome contaminants registered");
+        }
+
         [HarmonyPatch(nameof(BiomeManager.Start))]
         [HarmonyPrefix]
         public static bool Start_Prefix(BiomeManager __instance)
@@ -22,7 +31,7 @@ namespace GlobalGoopTracker
             if (nonBiomeManager == null)
             {
                 GlobalGoopTrackerMod.AddNonBiomeManager();
-                GlobalGoopTrackerMod.FixNonBiomeGoop();
+                __instance.StartCoroutine(RegisterContaminantsCoroutine(nonBiomeManager));
             }
 
             GlobalGoopTrackerMod.AddBiomeToDictionary(__instance);
@@ -30,32 +39,14 @@ namespace GlobalGoopTracker
 
             return __instance.biomeIndex != GlobalGoopTrackerMod.NON_BIOME_INDEX; //Skips the original Start() if this is the NonBiomeManager
         }
+
         [HarmonyPatch(nameof(BiomeManager.Update))]
         [HarmonyPrefix]
         public static bool Update_Prefix(BiomeManager __instance)
         {
-            if (__instance.biomeIndex == GlobalGoopTrackerMod.NON_BIOME_INDEX)
-            {
-                // Run the biome update only once, a couple frames after loading to give the other
-                // biomes a chance to claim their goop/litter and to fix incorrect references first
-                if (waitFrame == waitFrameTrigger)
-                {
-                    //__instance.UpdateBiomeTracking();
-                    __instance.GetPlantsInBiome();
-                    __instance.GetFlatGoopInBiome();
-                    __instance.GetRegrowthZonesInBiome();
-                    __instance.GetPlasticCloudsInBiome();
-                    __instance.GetLitterInBiome();
-                    waitFrame += 1;
-                }
-                else
-                {
-                    waitFrame += 1;
-                }
-                return false; //Skips the original Update() if this is the NonBiomeManager
-            }
-            return true;
+            return __instance.biomeIndex != GlobalGoopTrackerMod.NON_BIOME_INDEX; //Skips the original Update() if this is the NonBiomeManager
         }
+
         [HarmonyPatch(nameof(BiomeManager.Update))]
         [HarmonyPostfix]
         public static void Update_Postfix(BiomeManager __instance)
@@ -81,7 +72,6 @@ namespace GlobalGoopTracker
                     {
                         __instance.maxGoopPollution += (float)foodPlant.goopManager.numberOfManagedGoops;
                         __instance.AddToGoopPollution((float)foodPlant.goopManager.numberOfActiveGoops, true);
-                        foodPlant.saveID = __instance.RegisterBiomePlant(foodPlant);
                     }
                 }
                 return false;

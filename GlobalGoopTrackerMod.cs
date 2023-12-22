@@ -129,16 +129,5 @@ namespace GlobalGoopTracker
             }
             return true;
         }
-
-        [HarmonyPatch(typeof(MainMenu), nameof(MainMenu.Start))]
-        [HarmonyPostfix]
-        public static void MainMenuStart_Postfix(MainMenu __instance)
-        {
-            GameObject versionLabelObject = UnityEngine.GameObject.Find("Version Text");
-            TextMeshProUGUI versionLabel = versionLabelObject.GetComponent<TextMeshProUGUI>();
-            string version = versionLabel.text;
-            versionLabel.text = $"{version}\n{GlobalGoopTrackerPlugin.pluginName} v{GlobalGoopTrackerPlugin.versionString}";
-            versionLabel.alignment = TextAlignmentOptions.BottomRight;
-        }
     }
 }

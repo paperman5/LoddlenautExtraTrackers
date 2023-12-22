@@ -121,11 +121,11 @@ namespace GlobalGoopTracker
         [HarmonyPostfix]
         public static void MainMenuStart_Postfix(MainMenu __instance)
         {
-            GameObject versionLabelObject = __instance.gameObject.transform.Find("Version Text").gameObject;
+            GameObject versionLabelObject = UnityEngine.GameObject.Find("Version Text");
             TextMeshProUGUI versionLabel = versionLabelObject.GetComponent<TextMeshProUGUI>();
             string version = versionLabel.text;
             versionLabel.text = $"{version}\n{GlobalGoopTrackerPlugin.pluginName} v{GlobalGoopTrackerPlugin.versionString}";
-            //versionLabel.ForceMeshUpdate();
+            versionLabel.alignment = TextAlignmentOptions.BottomRight;
         }
     }
 }

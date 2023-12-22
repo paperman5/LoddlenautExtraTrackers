@@ -87,6 +87,19 @@ namespace GlobalGoopTracker
             }
         }
 
+        public static float GetGlobalPollutionAmount()
+        {
+            float totalPollution = 0.0f;
+            foreach (int bi in biomePollution.Keys)
+            {
+                BiomeManager bm;
+                bm = bi != -1 ? EngineHub.BiomeSaver.LookUpBiomeByID(bi) : nonBiomeManager;
+                totalPollution += bm.biomePollution;
+            }
+            totalPollution = totalPollution / biomePollution.Count;
+            return BloopTools.SnapToZero(totalPollution, 1E-06f);
+        }
+
         [HarmonyPatch(typeof(GameManager), nameof(GameManager.Update))]
         [HarmonyPostfix]
         public static void Update_Postfix()

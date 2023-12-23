@@ -3,6 +3,8 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
+using System.Reflection.Emit;
 using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
@@ -19,7 +21,13 @@ namespace GlobalGoopTracker
         public static IEnumerator RegisterContaminantsCoroutine(BiomeManager __instance)
         {
             yield return new WaitForSeconds(0.1f);
-            __instance.UpdateBiomeTracking();
+            // Don't use __instance.UpdateBiomeTracking() because it calls the Register() methods
+            // and gives things new saveID's, which messes with saving
+            __instance.GetPlantsInBiome();
+            __instance.GetFlatGoopInBiome();
+            __instance.GetRegrowthZonesInBiome();
+            __instance.GetPlasticCloudsInBiome();
+            __instance.GetLitterInBiome();
             __instance.externalPollutionUpdateQueued = true;
             GlobalGoopTrackerMod.log.LogInfo("Non-biome contaminants registered");
         }
@@ -72,6 +80,8 @@ namespace GlobalGoopTracker
                     {
                         __instance.maxGoopPollution += (float)foodPlant.goopManager.numberOfManagedGoops;
                         __instance.AddToGoopPollution((float)foodPlant.goopManager.numberOfActiveGoops, true);
+                        // Register without changing saveID
+                        __instance.RegisterBiomePlant(foodPlant);
                     }
                 }
                 return false;
@@ -100,7 +110,8 @@ namespace GlobalGoopTracker
                         __instance.maxGoopPollution += (float)floraRegrowthZone.goopManager.numberOfManagedGoops;
                         __instance.AddToGoopPollution((float)floraRegrowthZone.goopManager.numberOfActiveGoops, true);
                     }
-                    floraRegrowthZone.saveID = __instance.RegisterBiomeRegrowthZone(floraRegrowthZone);
+                    // Register without changing saveID
+                    __instance.RegisterBiomeRegrowthZone(floraRegrowthZone);
                 }
                 return false;
             }
@@ -123,7 +134,8 @@ namespace GlobalGoopTracker
                     }
                     __instance.maxPlasticCloudPollution += (float)microplasticsCloud.maxParticlesInCloud;
                     __instance.AddToPlasticCloudPollution((float)microplasticsCloud.currentParticlesInCloud, true);
-                    microplasticsCloud.saveID = __instance.RegisterBiomePlasticCloud(microplasticsCloud);
+                    // Register without changing saveID
+                    __instance.RegisterBiomePlasticCloud(microplasticsCloud);
                 }
                 return false;
             }
@@ -144,7 +156,8 @@ namespace GlobalGoopTracker
                         {
                             __instance.AddToGoopPollution(1f, true);
                         }
-                        flatGoop.saveID = __instance.RegisterBiomeFlatGoop(flatGoop);
+                        // Register without changing saveID
+                        __instance.RegisterBiomeFlatGoop(flatGoop);
                     }
                 }
                 return false;

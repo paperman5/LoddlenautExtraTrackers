@@ -78,9 +78,13 @@ namespace GlobalGoopTracker
         [HarmonyPatch(typeof(Chunk))]
         public static class Chunk_Patch
         {
+            public static int waitFrames = 3;
             public static IEnumerator StartTrackingCoroutine(Chunk __instance)
             {
-                yield return new WaitForSeconds(0.1f);
+                for (int i = 0; i < waitFrames; i++)
+                {
+                    yield return new WaitForEndOfFrame();
+                }
                 if (__instance.surroundingBiome == null && nonBiomeManager != null && __instance.CompareTag("Chunk"))
                 {
                     nonBiomeManager.StartTrackingChunkLitter(__instance.gameObject, false, false);
@@ -109,16 +113,6 @@ namespace GlobalGoopTracker
         [HarmonyPatch(typeof(FlatGoop))]
         public static class FlatGoop_Patch
         {
-            [HarmonyPatch(nameof(FlatGoop.Dissolve))]
-            [HarmonyPostfix]
-            public static void Dissolve_Postfix(FlatGoop __instance, bool instant = false)
-            {
-                BiomeManager biomeManager = __instance.surroundingBiome;
-                if (biomeManager == null)
-                {
-                    nonBiomeManager.AddToGoopPollution(-1f, instant);
-                }
-            }
             [HarmonyPatch(nameof(FlatGoop.Undissolve))]
             [HarmonyPostfix]
             public static void Undissolve_Postfix(FlatGoop __instance, bool instant = false, bool affectBiomePollution = false)
@@ -193,9 +187,13 @@ namespace GlobalGoopTracker
         [HarmonyPatch(typeof(Pickup))]
         public static class Pickup_Patch
         {
+            public static int waitFrames = 3;
             public static IEnumerator StartTrackingCoroutine(Pickup __instance)
             {
-                yield return new WaitForSeconds(0.1f);
+                for (int i = 0; i < waitFrames; i++)
+                {
+                    yield return new WaitForEndOfFrame();
+                }
                 if (__instance.surroundingBiome == null && nonBiomeManager != null && __instance.CompareTag("Litter"))
                 {
                     nonBiomeManager.StartTrackingPickupLitter(__instance.gameObject, false, false);

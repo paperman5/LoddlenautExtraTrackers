@@ -16,6 +16,8 @@ namespace GlobalGoopTracker
         public const string myGUID = "com.paperish.globalgooptracker";
         public const string pluginName = "Global Goop Tracker";
         public const string versionString = "1.0.0";
+        //TODO: Check FlatGoop loading logic
+        //      Fix global percentage counter colors
 
         private static readonly Harmony harmony = new Harmony(myGUID);
         private void Awake()

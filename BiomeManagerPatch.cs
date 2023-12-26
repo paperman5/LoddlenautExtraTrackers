@@ -15,12 +15,14 @@ namespace GlobalGoopTracker
     public static class BiomeManager_Patch
     {
         public static BiomeManager nonBiomeManager;
-        public static int waitFrame = 0;
-        public static int waitFrameTrigger = 2;
+        public static int waitFrames = 2;
 
         public static IEnumerator RegisterContaminantsCoroutine(BiomeManager __instance)
         {
-            yield return new WaitForSeconds(0.1f);
+            for (int i = 0; i < waitFrames; i++)
+            {
+                yield return new WaitForEndOfFrame();
+            }
             // Don't use __instance.UpdateBiomeTracking() because it calls the Register() methods
             // and gives things new saveID's, which messes with saving
             __instance.GetPlantsInBiome();
@@ -149,7 +151,7 @@ namespace GlobalGoopTracker
             {
                 foreach (FlatGoop flatGoop in UnityEngine.Object.FindObjectsByType<FlatGoop>(FindObjectsSortMode.None))
                 {
-                    if (!(flatGoop.flatGoopParentScript != null) && flatGoop.surroundingBiome == null)
+                    if (flatGoop.flatGoopParentScript == null && flatGoop.surroundingBiome == null)
                     {
                         __instance.maxGoopPollution += 1f;
                         if (!flatGoop.hasBeenDissolved)

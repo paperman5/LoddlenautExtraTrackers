@@ -22,10 +22,10 @@ namespace GlobalGoopTracker
 
         public static void AddBiomeToDictionary(BiomeManager bm)
         {
-            log.LogInfo(bm.biomeDisplayName);
-            log.LogInfo(bm.currentGoopPollution);
-            log.LogInfo(bm.currentPlasticCloudPollution);
-            log.LogInfo(bm.currentLitterPollution);
+            //log.LogInfo(bm.biomeDisplayName);
+            //log.LogInfo(bm.currentGoopPollution);
+            //log.LogInfo(bm.currentPlasticCloudPollution);
+            //log.LogInfo(bm.currentLitterPollution);
             int biomeIndex = bm.biomeIndex;
             if (!biomePollution.ContainsKey(biomeIndex))
             {
@@ -40,7 +40,7 @@ namespace GlobalGoopTracker
         {
             BiomeManager bm = ((BiomePollutionUpdated)e).biome;
             int biomeIndex = bm.biomeIndex;
-            log.LogInfo($"Updating biome {biomeIndex}");
+            //log.LogInfo($"Updating biome {biomeIndex}");
             if (biomePollution.ContainsKey(biomeIndex))
             {
                 biomePollution[biomeIndex]["goopPollution"] = bm.currentGoopPollution;
@@ -100,23 +100,23 @@ namespace GlobalGoopTracker
             return BloopTools.SnapToZero(totalPollution, 1E-06f);
         }
 
-        [HarmonyPatch(typeof(GameManager), nameof(GameManager.Update))]
-        [HarmonyPostfix]
-        public static void Update_Postfix()
-        {
-            if (Input.GetKeyDown(KeyCode.F3))
-            {
-                foreach (int bi in biomePollution.Keys)
-                {
-                    BiomeManager bm;
-                    bm = bi != -1 ? EngineHub.BiomeSaver.LookUpBiomeByID(bi) : nonBiomeManager;
-                    log.LogInfo(bm.biomeDisplayName);
-                    log.LogInfo($"goop: {biomePollution[bi]["goopPollution"]}");
-                    log.LogInfo($"plastic: {biomePollution[bi]["plasticCloudPollution"]}");
-                    log.LogInfo($"litter: {biomePollution[bi]["litterPollution"]}");
-                }
-            }
-        }
+        //[HarmonyPatch(typeof(GameManager), nameof(GameManager.Update))]
+        //[HarmonyPostfix]
+        //public static void Update_Postfix()
+        //{
+        //    if (Input.GetKeyDown(KeyCode.F3))
+        //    {
+        //        foreach (int bi in biomePollution.Keys)
+        //        {
+        //            BiomeManager bm;
+        //            bm = bi != -1 ? EngineHub.BiomeSaver.LookUpBiomeByID(bi) : nonBiomeManager;
+        //            log.LogInfo(bm.biomeDisplayName);
+        //            log.LogInfo($"goop: {biomePollution[bi]["goopPollution"]}");
+        //            log.LogInfo($"plastic: {biomePollution[bi]["plasticCloudPollution"]}");
+        //            log.LogInfo($"litter: {biomePollution[bi]["litterPollution"]}");
+        //        }
+        //    }
+        //}
 
         [HarmonyPatch(typeof(GameProgressTracker), nameof(GameProgressTracker.HandleBiomePollutionShift))]
         [HarmonyPrefix]

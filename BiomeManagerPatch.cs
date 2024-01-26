@@ -9,7 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
 
-namespace GlobalGoopTracker
+namespace ExtraTrackers
 {
     [HarmonyPatch(typeof(BiomeManager))]
     public static class BiomeManager_Patch

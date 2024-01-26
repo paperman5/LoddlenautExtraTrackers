@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 using TMPro;
 using UnityEngine;
 
-namespace GlobalGoopTracker
+namespace ExtraTrackers
 {
     [HarmonyPatch(typeof(BiomeManagementMenu))]
     public static class BiomeManagementMenu_Patch

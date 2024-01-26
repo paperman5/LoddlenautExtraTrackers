@@ -8,8 +8,9 @@ using System.Collections.Generic;
 using System.Reflection;
 using UnityEngine;
 using TMPro;
+using Unity.IL2CPP.CompilerServices;
 
-namespace GlobalGoopTracker
+namespace ExtraTrackers
 {
     public static class ExtraTrackersMod
     {
@@ -19,6 +20,35 @@ namespace GlobalGoopTracker
         public static Dictionary<int, Dictionary<string, float>> biomePollution = new Dictionary<int, Dictionary<string, float>>();
 
         public static BiomeManager nonBiomeManager;
+
+        public static List<LoddleAI.LoddleType> encounteredLoddleTypes = new List<LoddleAI.LoddleType>();
+        private static Dictionary<LoddleAI.LoddleType, Remark> _typeMapping;
+        public static Dictionary<LoddleAI.LoddleType, Remark> typeMapping
+        {
+            get
+            {
+                if (_typeMapping == null)
+                {
+                    _typeMapping = new Dictionary<LoddleAI.LoddleType, Remark>()
+                        {
+                            { LoddleAI.LoddleType.Eel,          EngineHub.GameDialogue.DaveRemarks[GoogleSheetsEntryNames.SirenEvoIntro     ] },
+                            { LoddleAI.LoddleType.Betta,        EngineHub.GameDialogue.DaveRemarks[GoogleSheetsEntryNames.BettaEvoIntro     ] },
+                            { LoddleAI.LoddleType.FlyingFish,   EngineHub.GameDialogue.DaveRemarks[GoogleSheetsEntryNames.WingfinEvoIntro   ] },
+                            { LoddleAI.LoddleType.SeaAngel,     EngineHub.GameDialogue.DaveRemarks[GoogleSheetsEntryNames.ButterflyEvoIntro ] },
+                            { LoddleAI.LoddleType.Catfish,      EngineHub.GameDialogue.DaveRemarks[GoogleSheetsEntryNames.WhiskerEvoIntro   ] },
+                            { LoddleAI.LoddleType.MantaRay,     EngineHub.GameDialogue.DaveRemarks[GoogleSheetsEntryNames.MantaEvoIntro     ] },
+                            { LoddleAI.LoddleType.Loach,        EngineHub.GameDialogue.DaveRemarks[GoogleSheetsEntryNames.SnakeEvoIntro     ] },
+                            { LoddleAI.LoddleType.SeaBunny,     EngineHub.GameDialogue.DaveRemarks[GoogleSheetsEntryNames.BunnyEvoIntro     ] },
+                            { LoddleAI.LoddleType.Pufferfish,   EngineHub.GameDialogue.DaveRemarks[GoogleSheetsEntryNames.PufferEvoIntro    ] },
+                            { LoddleAI.LoddleType.Axolotl,      EngineHub.GameDialogue.DaveRemarks[GoogleSheetsEntryNames.AxoEvoIntro       ] },
+                            { LoddleAI.LoddleType.Angler,       EngineHub.GameDialogue.DaveRemarks[GoogleSheetsEntryNames.AnglerEvoIntro    ] },
+                            { LoddleAI.LoddleType.Dumbo,        EngineHub.GameDialogue.DaveRemarks[GoogleSheetsEntryNames.OctoEvoIntro      ] },
+                            { LoddleAI.LoddleType.MegaLod,      EngineHub.GameDialogue.DaveRemarks[GoogleSheetsEntryNames.JumboEvoIntro     ] },
+                        };
+                }
+                return _typeMapping;
+            }
+        }
 
         public static void AddBiomeToDictionary(BiomeManager bm)
         {
@@ -34,6 +64,12 @@ namespace GlobalGoopTracker
             biomePollution[biomeIndex]["goopPollution"] = bm.currentGoopPollution;
             biomePollution[biomeIndex]["plasticCloudPollution"] = bm.currentPlasticCloudPollution;
             biomePollution[biomeIndex]["litterPollution"] = bm.currentLitterPollution;
+            int goopyLoddles = 0;
+            foreach (LoddleAI loddle in bm.loddlesInBiome)
+            {
+                goopyLoddles += loddle.isGoopy ? 1 : 0;
+            }
+            biomePollution[biomeIndex]["goopyLoddles"] = goopyLoddles;
         }
 
         public static void UpdateBiomePollution(GameEvent e)
@@ -46,7 +82,36 @@ namespace GlobalGoopTracker
                 biomePollution[biomeIndex]["goopPollution"] = bm.currentGoopPollution;
                 biomePollution[biomeIndex]["plasticCloudPollution"] = bm.currentPlasticCloudPollution;
                 biomePollution[biomeIndex]["litterPollution"] = bm.currentLitterPollution;
+                int goopyLoddles = 0;
+                foreach (LoddleAI loddle in bm.loddlesInBiome)
+                {
+                    goopyLoddles += loddle.isGoopy ? 1 : 0;
+                }
+                biomePollution[biomeIndex]["goopyLoddles"] = goopyLoddles;
             }
+        }
+
+        public static void UpdateEncounteredLoddleTypes()
+        {
+            foreach (KeyValuePair<LoddleAI.LoddleType, Remark> entry in typeMapping)
+            {
+                if (!encounteredLoddleTypes.Contains(entry.Key) && entry.Value.ReachedDisplayLimit())
+                {
+                    encounteredLoddleTypes.Add(entry.Key);
+                }
+            }
+            encounteredLoddleTypes.Sort();
+        }
+
+        public static void UpdateEncounteredLoddleTypes(GameEvent e)
+        {
+            LoddleMetPlayer ev = (LoddleMetPlayer)e;
+            //log.LogInfo($"Encountered loddle type {ev.loddleType}");
+            if (ev.loddleType != LoddleAI.LoddleType.Offspring && ev.loddleType != LoddleAI.LoddleType.Scene && !encounteredLoddleTypes.Contains(ev.loddleType))
+            {
+                encounteredLoddleTypes.Add(ev.loddleType);
+            }
+            UpdateEncounteredLoddleTypes();
         }
 
         public static void AddNonBiomeManager()
@@ -117,17 +182,5 @@ namespace GlobalGoopTracker
         //        }
         //    }
         //}
-
-        [HarmonyPatch(typeof(GameProgressTracker), nameof(GameProgressTracker.HandleBiomePollutionShift))]
-        [HarmonyPrefix]
-        public static bool HandleBiomePollutionShift_Prefix(GameEvent e)
-        {
-            // Don't handle biome pollution shifting for non-biome pollution
-            if (((BiomePollutionUpdated)e).biome.biomeIndex == NON_BIOME_INDEX)
-            {
-                return false;
-            }
-            return true;
-        }
     }
 }

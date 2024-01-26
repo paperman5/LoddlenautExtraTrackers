@@ -8,7 +8,7 @@ using static HarmonyLib.Tools.Logger;
 using UnityEngine;
 using System;
 
-namespace GlobalGoopTracker
+namespace ExtraTrackers
 {
     [BepInPlugin(myGUID, pluginName, versionString)]
     public class ExtraTrackersPlugin : BaseUnityPlugin

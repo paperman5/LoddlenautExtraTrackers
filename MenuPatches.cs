@@ -22,9 +22,9 @@ namespace GlobalGoopTracker
             {
                 __instance.PlayLayoutSwapAnimation();
             }
-            BiomeManager biomeManager = GlobalGoopTrackerMod.nonBiomeManager;
+            BiomeManager biomeManager = ExtraTrackersMod.nonBiomeManager;
             currentBiomeTextMesh.text = "Global Progress";
-            float globalPollutionAmount = GlobalGoopTrackerMod.GetGlobalPollutionAmount();
+            float globalPollutionAmount = ExtraTrackersMod.GetGlobalPollutionAmount();
             __instance.cleanText.text = ScriptLocalization.Biome_Menu.Clean_Amount.Replace("{PERCENT}", Mathf.FloorToInt((1f - globalPollutionAmount) * 100f).ToString());
             __instance.cleanText.color = __instance.biomeHealthColors[biomeManager.currentAmbientPollutionStage];
             __instance.litterAmountText.text = (Mathf.Max(biomeManager.GetNumberOfLitterObjects(), 0).ToString() ?? "");
@@ -115,7 +115,7 @@ namespace GlobalGoopTracker
             GameObject versionLabelObject = UnityEngine.GameObject.Find("Version Text");
             TextMeshProUGUI versionLabel = versionLabelObject.GetComponent<TextMeshProUGUI>();
             string version = versionLabel.text;
-            versionLabel.text = $"{version}\n{GlobalGoopTrackerPlugin.pluginName} v{GlobalGoopTrackerPlugin.versionString}";
+            versionLabel.text = $"{version}\n{ExtraTrackersPlugin.pluginName} v{ExtraTrackersPlugin.versionString}";
             versionLabel.alignment = TextAlignmentOptions.BottomRight;
         }
     }

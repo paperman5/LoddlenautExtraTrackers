@@ -31,7 +31,7 @@ namespace GlobalGoopTracker
             __instance.GetPlasticCloudsInBiome();
             __instance.GetLitterInBiome();
             __instance.externalPollutionUpdateQueued = true;
-            GlobalGoopTrackerMod.log.LogInfo("Non-biome contaminants registered");
+            ExtraTrackersMod.log.LogInfo("Non-biome contaminants registered");
         }
 
         [HarmonyPatch(nameof(BiomeManager.Start))]
@@ -40,28 +40,28 @@ namespace GlobalGoopTracker
         {
             if (nonBiomeManager == null)
             {
-                GlobalGoopTrackerMod.AddNonBiomeManager();
+                ExtraTrackersMod.AddNonBiomeManager();
                 __instance.StartCoroutine(RegisterContaminantsCoroutine(nonBiomeManager));
             }
 
-            GlobalGoopTrackerMod.AddBiomeToDictionary(__instance);
-            EngineHub.EventManager.Register<BiomePollutionUpdated>(new GameEvent.Handler(GlobalGoopTrackerMod.UpdateBiomePollution));
+            ExtraTrackersMod.AddBiomeToDictionary(__instance);
+            EngineHub.EventManager.Register<BiomePollutionUpdated>(new GameEvent.Handler(ExtraTrackersMod.UpdateBiomePollution));
 
-            return __instance.biomeIndex != GlobalGoopTrackerMod.NON_BIOME_INDEX; //Skips the original Start() if this is the NonBiomeManager
+            return __instance.biomeIndex != ExtraTrackersMod.NON_BIOME_INDEX; //Skips the original Start() if this is the NonBiomeManager
         }
 
         [HarmonyPatch(nameof(BiomeManager.Update))]
         [HarmonyPrefix]
         public static bool Update_Prefix(BiomeManager __instance)
         {
-            return __instance.biomeIndex != GlobalGoopTrackerMod.NON_BIOME_INDEX; //Skips the original Update() if this is the NonBiomeManager
+            return __instance.biomeIndex != ExtraTrackersMod.NON_BIOME_INDEX; //Skips the original Update() if this is the NonBiomeManager
         }
 
         [HarmonyPatch(nameof(BiomeManager.Update))]
         [HarmonyPostfix]
         public static void Update_Postfix(BiomeManager __instance)
         {
-            if (__instance.biomeIndex == GlobalGoopTrackerMod.NON_BIOME_INDEX && __instance.externalPollutionUpdateQueued)
+            if (__instance.biomeIndex == ExtraTrackersMod.NON_BIOME_INDEX && __instance.externalPollutionUpdateQueued)
             {
                 __instance.UpdateOverallPollution(false, true);
                 __instance.externalPollutionUpdateQueued = false;
@@ -71,7 +71,7 @@ namespace GlobalGoopTracker
         [HarmonyPrefix]
         public static bool GetPlantsInBiome_Prefix(BiomeManager __instance)
         {
-            if (__instance.biomeIndex == GlobalGoopTrackerMod.NON_BIOME_INDEX)
+            if (__instance.biomeIndex == ExtraTrackersMod.NON_BIOME_INDEX)
             {
                 FoodPlant[] foodPlants = UnityEngine.Object.FindObjectsByType<FoodPlant>(FindObjectsSortMode.None);
                 __instance.currentGoopPollution = 0f;
@@ -94,7 +94,7 @@ namespace GlobalGoopTracker
         [HarmonyPrefix]
         public static bool GetRegrowthZonesInBiome_Prefix(BiomeManager __instance)
         {
-            if (__instance.biomeIndex == GlobalGoopTrackerMod.NON_BIOME_INDEX)
+            if (__instance.biomeIndex == ExtraTrackersMod.NON_BIOME_INDEX)
             {
                 foreach (FloraRegrowthZone floraRegrowthZone in UnityEngine.Object.FindObjectsByType<FloraRegrowthZone>(FindObjectsSortMode.None))
                 {
@@ -123,7 +123,7 @@ namespace GlobalGoopTracker
         [HarmonyPrefix]
         public static bool GetPlasticCloudsInBiome_Prefix(BiomeManager __instance)
         {
-            if (__instance.biomeIndex == GlobalGoopTrackerMod.NON_BIOME_INDEX)
+            if (__instance.biomeIndex == ExtraTrackersMod.NON_BIOME_INDEX)
             {
                 MicroplasticsCloud[] plasticClouds = UnityEngine.Object.FindObjectsByType<MicroplasticsCloud>(FindObjectsSortMode.None);
                 __instance.currentPlasticCloudPollution = 0f;
@@ -147,7 +147,7 @@ namespace GlobalGoopTracker
         [HarmonyPrefix]
         public static bool GetFlatGoopInBiome_Prefix(BiomeManager __instance)
         {
-            if (__instance.biomeIndex == GlobalGoopTrackerMod.NON_BIOME_INDEX)
+            if (__instance.biomeIndex == ExtraTrackersMod.NON_BIOME_INDEX)
             {
                 foreach (FlatGoop flatGoop in UnityEngine.Object.FindObjectsByType<FlatGoop>(FindObjectsSortMode.None))
                 {
@@ -170,7 +170,7 @@ namespace GlobalGoopTracker
         [HarmonyPrefix]
         public static bool GetPickupLitterInBiome_Prefix(BiomeManager __instance)
         {
-            if (__instance.biomeIndex == GlobalGoopTrackerMod.NON_BIOME_INDEX)
+            if (__instance.biomeIndex == ExtraTrackersMod.NON_BIOME_INDEX)
             {
                 foreach (Pickup pickup in UnityEngine.Object.FindObjectsByType<Pickup>(FindObjectsSortMode.None))
                 {
@@ -187,7 +187,7 @@ namespace GlobalGoopTracker
         [HarmonyPrefix]
         public static bool GetChunkLitterInBiome_Prefix(BiomeManager __instance)
         {
-            if (__instance.biomeIndex == GlobalGoopTrackerMod.NON_BIOME_INDEX)
+            if (__instance.biomeIndex == ExtraTrackersMod.NON_BIOME_INDEX)
             {
                 foreach (Chunk chunk in UnityEngine.Object.FindObjectsByType<Chunk>(FindObjectsSortMode.None))
                 {
@@ -205,7 +205,7 @@ namespace GlobalGoopTracker
         //This could probably be a transpiler
         public static bool StartTrackingPickupLitter_Prefix(BiomeManager __instance, GameObject pickupToTrack, bool skipEffects = false, bool forceUpdate = false)
         {
-            if (__instance.biomeIndex == GlobalGoopTrackerMod.NON_BIOME_INDEX)
+            if (__instance.biomeIndex == ExtraTrackersMod.NON_BIOME_INDEX)
             {
                 if (__instance.litterPickupsInBiome.Contains(pickupToTrack) && !forceUpdate)
                 {
@@ -231,7 +231,7 @@ namespace GlobalGoopTracker
         //This could probably be a transpiler
         public static bool StartTrackingChunkLitter_Prefix(BiomeManager __instance, GameObject chunkToTrack, bool skipEffects = false, bool forceUpdate = false)
         {
-            if (__instance.biomeIndex == GlobalGoopTrackerMod.NON_BIOME_INDEX)
+            if (__instance.biomeIndex == ExtraTrackersMod.NON_BIOME_INDEX)
             {
                 if (__instance.litterChunksInBiome.Contains(chunkToTrack) && !forceUpdate)
                 {
@@ -256,7 +256,7 @@ namespace GlobalGoopTracker
         [HarmonyPrefix]
         public static bool UpdateOverallPollution_Prefix(BiomeManager __instance, bool skipEffects = false, bool instantTransition = false)
         {
-            if (__instance.biomeIndex == GlobalGoopTrackerMod.NON_BIOME_INDEX)
+            if (__instance.biomeIndex == ExtraTrackersMod.NON_BIOME_INDEX)
             {
                 float goopPollution = (__instance.maxGoopPollution > 0f) ? (__instance.currentGoopPollution / __instance.maxGoopPollution) : 0f;
                 float plasticMult = (__instance.maxPlasticCloudPollution > 0f) ? __instance.plasticCloudContributionToBiomePollution : 0f;

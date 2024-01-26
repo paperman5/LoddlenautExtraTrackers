@@ -11,11 +11,11 @@ using System;
 namespace GlobalGoopTracker
 {
     [BepInPlugin(myGUID, pluginName, versionString)]
-    public class GlobalGoopTrackerPlugin : BaseUnityPlugin
+    public class ExtraTrackersPlugin : BaseUnityPlugin
     {
-        public const string myGUID = "com.paperish.globalgooptracker";
-        public const string pluginName = "Global Goop Tracker";
-        public const string versionString = "1.0.0";
+        public const string myGUID = "com.paperish.extratrackers";
+        public const string pluginName = "Extra Trackers";
+        public const string versionString = "1.1.0";
         //TODO: Check FlatGoop loading logic
         //      Fix global percentage counter colors
 
@@ -23,7 +23,7 @@ namespace GlobalGoopTracker
         private void Awake()
         {
             // Plugin startup logic //
-            GlobalGoopTrackerMod.log = Logger;
+            ExtraTrackersMod.log = Logger;
             //ChannelFilter = LogChannel.All;
             //HarmonyFileLog.Enabled = true;
 

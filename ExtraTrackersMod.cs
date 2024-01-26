@@ -11,7 +11,7 @@ using TMPro;
 
 namespace GlobalGoopTracker
 {
-    public static class GlobalGoopTrackerMod
+    public static class ExtraTrackersMod
     {
         public const int NON_BIOME_INDEX = -1;
         public static ManualLogSource log;

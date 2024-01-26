@@ -160,7 +160,7 @@ namespace GlobalGoopTracker
             {
                 if (__instance.parentBiome != null && __instance.transform.root.gameObject.name == "NonBiome_Decor")
                 {
-                    GlobalGoopTrackerMod.log.LogInfo($"Non-biome plant {__instance.saveID} with reference to {__instance.parentBiome}, fixing");
+                    ExtraTrackersMod.log.LogInfo($"Non-biome plant {__instance.saveID} with reference to {__instance.parentBiome}, fixing");
                     __instance.parentBiome = null;
                 }
             }

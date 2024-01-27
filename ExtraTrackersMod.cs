@@ -9,6 +9,7 @@ using System.Reflection;
 using UnityEngine;
 using TMPro;
 using Unity.IL2CPP.CompilerServices;
+using System.Drawing.Printing;
 
 namespace ExtraTrackers
 {
@@ -22,14 +23,14 @@ namespace ExtraTrackers
         public static BiomeManager nonBiomeManager;
 
         public static List<LoddleAI.LoddleType> encounteredLoddleTypes = new List<LoddleAI.LoddleType>();
-        private static Dictionary<LoddleAI.LoddleType, Remark> _typeMapping;
-        public static Dictionary<LoddleAI.LoddleType, Remark> typeMapping
+        private static Dictionary<LoddleAI.LoddleType, Remark> _typeRemarkMapping;
+        public static Dictionary<LoddleAI.LoddleType, Remark> TypeRemarkMapping
         {
             get
             {
-                if (_typeMapping == null)
+                if (_typeRemarkMapping == null)
                 {
-                    _typeMapping = new Dictionary<LoddleAI.LoddleType, Remark>()
+                    _typeRemarkMapping = new Dictionary<LoddleAI.LoddleType, Remark>()
                         {
                             { LoddleAI.LoddleType.Eel,          EngineHub.GameDialogue.DaveRemarks[GoogleSheetsEntryNames.SirenEvoIntro     ] },
                             { LoddleAI.LoddleType.Betta,        EngineHub.GameDialogue.DaveRemarks[GoogleSheetsEntryNames.BettaEvoIntro     ] },
@@ -46,9 +47,25 @@ namespace ExtraTrackers
                             { LoddleAI.LoddleType.MegaLod,      EngineHub.GameDialogue.DaveRemarks[GoogleSheetsEntryNames.JumboEvoIntro     ] },
                         };
                 }
-                return _typeMapping;
+                return _typeRemarkMapping;
             }
         }
+        public static Dictionary<LoddleAI.LoddleType, String> typeStringMapping = new Dictionary<LoddleAI.LoddleType, string>()
+        {
+            { LoddleAI.LoddleType.Eel,          "Siren"     },
+            { LoddleAI.LoddleType.Betta,        "Betta"     },
+            { LoddleAI.LoddleType.FlyingFish,   "Wingfin"   },
+            { LoddleAI.LoddleType.SeaAngel,     "Butterfly" },
+            { LoddleAI.LoddleType.Catfish,      "Whisker"   },
+            { LoddleAI.LoddleType.MantaRay,     "Manta"     },
+            { LoddleAI.LoddleType.Loach,        "Snake"     },
+            { LoddleAI.LoddleType.SeaBunny,     "Bunny"     },
+            { LoddleAI.LoddleType.Pufferfish,   "Puffer"    },
+            { LoddleAI.LoddleType.Axolotl,      "Axo"       },
+            { LoddleAI.LoddleType.Angler,       "Angler"    },
+            { LoddleAI.LoddleType.Dumbo,        "Octo"      },
+            { LoddleAI.LoddleType.MegaLod,      "Jumbo"     },
+        };
 
         public static void AddBiomeToDictionary(BiomeManager bm)
         {
@@ -93,7 +110,7 @@ namespace ExtraTrackers
 
         public static void UpdateEncounteredLoddleTypes()
         {
-            foreach (KeyValuePair<LoddleAI.LoddleType, Remark> entry in typeMapping)
+            foreach (KeyValuePair<LoddleAI.LoddleType, Remark> entry in TypeRemarkMapping)
             {
                 if (!encounteredLoddleTypes.Contains(entry.Key) && entry.Value.ReachedDisplayLimit())
                 {
@@ -106,7 +123,6 @@ namespace ExtraTrackers
         public static void UpdateEncounteredLoddleTypes(GameEvent e)
         {
             LoddleMetPlayer ev = (LoddleMetPlayer)e;
-            //log.LogInfo($"Encountered loddle type {ev.loddleType}");
             if (ev.loddleType != LoddleAI.LoddleType.Offspring && ev.loddleType != LoddleAI.LoddleType.Scene && !encounteredLoddleTypes.Contains(ev.loddleType))
             {
                 encounteredLoddleTypes.Add(ev.loddleType);
@@ -163,6 +179,21 @@ namespace ExtraTrackers
             }
             totalPollution = totalPollution / biomePollution.Count;
             return BloopTools.SnapToZero(totalPollution, 1E-06f);
+        }
+
+        public static int GetGoopyLoddlesCount()
+        {
+            int goopyLoddles = 0;
+            foreach (int bi in biomePollution.Keys)
+            {
+                BiomeManager bm;
+                bm = bi != -1 ? EngineHub.BiomeSaver.LookUpBiomeByID(bi) : nonBiomeManager;
+                foreach (LoddleAI loddle in bm.loddlesInBiome)
+                {
+                    goopyLoddles += loddle.isGoopy ? 1 : 0;
+                }
+            }
+            return goopyLoddles;
         }
 
         //[HarmonyPatch(typeof(GameManager), nameof(GameManager.Update))]

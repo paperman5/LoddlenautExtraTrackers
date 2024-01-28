@@ -24,21 +24,25 @@ namespace ExtraTrackers
 
         public static void UpdateBiomeMenuInfoForNonBiome(BiomeManagementMenu __instance, bool playChangeAnimation = false)
         {
+            // Updates the modified "Global Progress" window on the biome management menu.
             SwitchToNonBiomeLayout(__instance);
             if (playChangeAnimation)
             {
                 __instance.PlayLayoutSwapAnimation();
             }
             BiomeManager biomeManager = ExtraTrackersMod.nonBiomeManager;
+            // Update the global cleaned progress
             currentBiomeTextMesh.text = "Global Progress";
             float globalPollutionAmount = ExtraTrackersMod.GetGlobalPollutionAmount();
             __instance.cleanText.text = ScriptLocalization.Biome_Menu.Clean_Amount.Replace("{PERCENT}", Mathf.FloorToInt((1f - globalPollutionAmount) * 100f).ToString());
             int pollutionStage = (int)Mathf.Ceil(globalPollutionAmount * (__instance.biomeHealthColors.Count() - 1));
             __instance.cleanText.color = __instance.biomeHealthColors[pollutionStage];
+            // Update the goop numbers
             __instance.litterAmountText.text = (Mathf.Max(biomeManager.GetNumberOfLitterObjects(), 0).ToString() ?? "");
             __instance.goopAmountText.text = (Mathf.Max(biomeManager.GetNumberOfGoopNodes(), 0).ToString() ?? "");
             __instance.microplasticsAmountText.text = (Mathf.Max(biomeManager.GetMicroplasticsValue(), 0).ToString() ?? "");
             __instance.inhabitantsText.text = ExtraTrackersMod.GetGoopyLoddlesCount().ToString();
+            // Update the encountered loddle types
             UpdateLoddleListLabels();
         }
 
@@ -126,6 +130,8 @@ namespace ExtraTrackers
 
         public static void InitializeLoddleListLayoutGroup(BiomeManagementMenu __instance)
         {
+            // This mod adds a GridLayoutGroup to display the encountered loddle types.
+            loddleListLabels = new List<TextMeshProUGUI>(); // Reset in case of save/load
             GameObject go = new GameObject();
             go.name = "Loddle List Grid";
             go.transform.parent = __instance.nativeFruitGroup.transform;
@@ -133,6 +139,7 @@ namespace ExtraTrackers
             go.GetComponent<RectTransform>().anchoredPosition = __instance.nativeFruitGroup.transform.Find("Native Fruit Arranger").GetComponent<RectTransform>().anchoredPosition;
             go.GetComponent<RectTransform>().sizeDelta = __instance.nativeFruitGroup.transform.Find("Native Fruit Arranger").GetComponent<RectTransform>().sizeDelta;
             go.AddComponent<GridLayoutGroup>();
+            // Set the properties of the GridLayoutGroup
             loddleListLayoutGroup = go.GetComponent<GridLayoutGroup>();
             loddleListLayoutGroup.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
             loddleListLayoutGroup.constraintCount = 3;
@@ -142,6 +149,7 @@ namespace ExtraTrackers
             go.transform.localScale = new Vector3(1f, 1f, 1f);
             go.GetComponent<RectTransform>().anchoredPosition += new Vector2(0f, -100f);
 
+            // Create a label with similar properties to the other labels on this screen, to copy for each loddle type
             GameObject prototypeLabel = GameObject.Instantiate(__instance.contaminantsGroup.transform.Find("Litter Amount Label").gameObject);
             prototypeLabel.name = "Loddle Type Label";
             prototypeLabel.GetComponent<TextMeshProUGUI>().enableAutoSizing = false;
@@ -150,7 +158,7 @@ namespace ExtraTrackers
             prototypeLabel.GetComponent<TextMeshProUGUI>().text = "";
             GameObject.Destroy(prototypeLabel.GetComponent<Localize>());
 
-            for (int i = 0; i < (int)Mathf.Ceil(ExtraTrackersMod.TypeRemarkMapping.Count / 3f)*3; i++)
+            for (int i = 0; i < (int)Mathf.Ceil(ExtraTrackersMod.typeRemarkMapping.Count / 3f)*3; i++)
             {
                 GameObject label = GameObject.Instantiate(prototypeLabel, loddleListLayoutGroup.transform);
                 loddleListLabels.Add(label.GetComponent<TextMeshProUGUI>());
@@ -160,9 +168,9 @@ namespace ExtraTrackers
 
         public static void UpdateLoddleListLabels()
         {
-            ExtraTrackersMod.UpdateEncounteredLoddleTypes();
+            List<LoddleAI.LoddleType> encounteredLoddleTypes = ExtraTrackersMod.GetEncounteredLoddleTypes();
             List<string> loddleStrings = new List<string>();
-            foreach (LoddleAI.LoddleType loddleType in ExtraTrackersMod.encounteredLoddleTypes)
+            foreach (LoddleAI.LoddleType loddleType in encounteredLoddleTypes)
             {
                 loddleStrings.Add(ExtraTrackersMod.typeStringMapping[loddleType]);
             }
@@ -175,6 +183,7 @@ namespace ExtraTrackers
             for (int i = 0; i < loddleStrings.Count; i++)
             {
                 loddleListLabels[i].text = loddleStrings[i];
+                // Make the last entry centered
                 if (i == 12)
                 {
                     loddleListLabels[12].text = "";
@@ -198,6 +207,7 @@ namespace ExtraTrackers
         [HarmonyPrefix]
         public static bool CloseBiomeMenu_Prefix(CentralGameMenu __instance, bool instant = false, bool forceClose = false)
         {
+            // Hook into the method to close the individual biome menu, to display the global progress instead of closing the menu.
             __instance.ClearPrimedBiome(CentralGameMenu.WorldLocation.NONE, true);
             BiomeManagementMenu_Patch.UpdateBiomeMenuInfoForNonBiome(__instance.biomeMenu, __instance.currentBiomeMenuLocation == CentralGameMenu.WorldLocation.NONE);
             __instance.ClearPrimedBiome(CentralGameMenu.WorldLocation.NONE, true);
@@ -213,6 +223,7 @@ namespace ExtraTrackers
         [HarmonyPostfix]
         public static void MainMenuStart_Postfix(MainMenu __instance)
         {
+            // Add a mod version label on the title screen
             GameObject versionLabelObject = UnityEngine.GameObject.Find("Version Text");
             TextMeshProUGUI versionLabel = versionLabelObject.GetComponent<TextMeshProUGUI>();
             string version = versionLabel.text;

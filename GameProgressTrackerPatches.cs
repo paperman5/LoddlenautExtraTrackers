@@ -24,19 +24,5 @@ namespace ExtraTrackers
             }
             return true;
         }
-
-        [HarmonyPatch(nameof(GameProgressTracker.RegisterForEvents))]
-        [HarmonyPostfix]
-        public static void RegisterForEvents_Postfix()
-        {
-            EngineHub.EventManager.Register<LoddleMetPlayer>(new GameEvent.Handler(ExtraTrackersMod.UpdateEncounteredLoddleTypes));
-        }
-
-        [HarmonyPatch(nameof(GameProgressTracker.Initialize))]
-        [HarmonyPostfix]
-        public static void Initialize_Postfix()
-        {
-            ExtraTrackersMod.UpdateEncounteredLoddleTypes();
-        }
     }
 }

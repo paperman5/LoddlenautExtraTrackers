@@ -22,35 +22,23 @@ namespace ExtraTrackers
 
         public static BiomeManager nonBiomeManager;
 
-        public static List<LoddleAI.LoddleType> encounteredLoddleTypes = new List<LoddleAI.LoddleType>();
-        private static Dictionary<LoddleAI.LoddleType, Remark> _typeRemarkMapping;
-        public static Dictionary<LoddleAI.LoddleType, Remark> TypeRemarkMapping
+        public static Dictionary<LoddleAI.LoddleType, string> typeRemarkMapping = new Dictionary<LoddleAI.LoddleType, string>()
         {
-            get
-            {
-                if (_typeRemarkMapping == null)
-                {
-                    _typeRemarkMapping = new Dictionary<LoddleAI.LoddleType, Remark>()
-                        {
-                            { LoddleAI.LoddleType.Eel,          EngineHub.GameDialogue.DaveRemarks[GoogleSheetsEntryNames.SirenEvoIntro     ] },
-                            { LoddleAI.LoddleType.Betta,        EngineHub.GameDialogue.DaveRemarks[GoogleSheetsEntryNames.BettaEvoIntro     ] },
-                            { LoddleAI.LoddleType.FlyingFish,   EngineHub.GameDialogue.DaveRemarks[GoogleSheetsEntryNames.WingfinEvoIntro   ] },
-                            { LoddleAI.LoddleType.SeaAngel,     EngineHub.GameDialogue.DaveRemarks[GoogleSheetsEntryNames.ButterflyEvoIntro ] },
-                            { LoddleAI.LoddleType.Catfish,      EngineHub.GameDialogue.DaveRemarks[GoogleSheetsEntryNames.WhiskerEvoIntro   ] },
-                            { LoddleAI.LoddleType.MantaRay,     EngineHub.GameDialogue.DaveRemarks[GoogleSheetsEntryNames.MantaEvoIntro     ] },
-                            { LoddleAI.LoddleType.Loach,        EngineHub.GameDialogue.DaveRemarks[GoogleSheetsEntryNames.SnakeEvoIntro     ] },
-                            { LoddleAI.LoddleType.SeaBunny,     EngineHub.GameDialogue.DaveRemarks[GoogleSheetsEntryNames.BunnyEvoIntro     ] },
-                            { LoddleAI.LoddleType.Pufferfish,   EngineHub.GameDialogue.DaveRemarks[GoogleSheetsEntryNames.PufferEvoIntro    ] },
-                            { LoddleAI.LoddleType.Axolotl,      EngineHub.GameDialogue.DaveRemarks[GoogleSheetsEntryNames.AxoEvoIntro       ] },
-                            { LoddleAI.LoddleType.Angler,       EngineHub.GameDialogue.DaveRemarks[GoogleSheetsEntryNames.AnglerEvoIntro    ] },
-                            { LoddleAI.LoddleType.Dumbo,        EngineHub.GameDialogue.DaveRemarks[GoogleSheetsEntryNames.OctoEvoIntro      ] },
-                            { LoddleAI.LoddleType.MegaLod,      EngineHub.GameDialogue.DaveRemarks[GoogleSheetsEntryNames.JumboEvoIntro     ] },
-                        };
-                }
-                return _typeRemarkMapping;
-            }
-        }
-        public static Dictionary<LoddleAI.LoddleType, String> typeStringMapping = new Dictionary<LoddleAI.LoddleType, string>()
+            { LoddleAI.LoddleType.Eel,          GoogleSheetsEntryNames.SirenEvoIntro     },
+            { LoddleAI.LoddleType.Betta,        GoogleSheetsEntryNames.BettaEvoIntro     },
+            { LoddleAI.LoddleType.FlyingFish,   GoogleSheetsEntryNames.WingfinEvoIntro   },
+            { LoddleAI.LoddleType.SeaAngel,     GoogleSheetsEntryNames.ButterflyEvoIntro },
+            { LoddleAI.LoddleType.Catfish,      GoogleSheetsEntryNames.WhiskerEvoIntro   },
+            { LoddleAI.LoddleType.MantaRay,     GoogleSheetsEntryNames.MantaEvoIntro     },
+            { LoddleAI.LoddleType.Loach,        GoogleSheetsEntryNames.SnakeEvoIntro     },
+            { LoddleAI.LoddleType.SeaBunny,     GoogleSheetsEntryNames.BunnyEvoIntro     },
+            { LoddleAI.LoddleType.Pufferfish,   GoogleSheetsEntryNames.PufferEvoIntro    },
+            { LoddleAI.LoddleType.Axolotl,      GoogleSheetsEntryNames.AxoEvoIntro       },
+            { LoddleAI.LoddleType.Angler,       GoogleSheetsEntryNames.AnglerEvoIntro    },
+            { LoddleAI.LoddleType.Dumbo,        GoogleSheetsEntryNames.OctoEvoIntro      },
+            { LoddleAI.LoddleType.MegaLod,      GoogleSheetsEntryNames.JumboEvoIntro     },
+        };
+        public static Dictionary<LoddleAI.LoddleType, string> typeStringMapping = new Dictionary<LoddleAI.LoddleType, string>()
         {
             { LoddleAI.LoddleType.Eel,          "Siren"     },
             { LoddleAI.LoddleType.Betta,        "Betta"     },
@@ -108,26 +96,17 @@ namespace ExtraTrackers
             }
         }
 
-        public static void UpdateEncounteredLoddleTypes()
+        public static List<LoddleAI.LoddleType> GetEncounteredLoddleTypes()
         {
-            foreach (KeyValuePair<LoddleAI.LoddleType, Remark> entry in TypeRemarkMapping)
+            List<LoddleAI.LoddleType> encounteredLoddleTypes = new List<LoddleAI.LoddleType>();
+            foreach (KeyValuePair<LoddleAI.LoddleType, string> entry in typeRemarkMapping)
             {
-                if (!encounteredLoddleTypes.Contains(entry.Key) && entry.Value.ReachedDisplayLimit())
+                if (EngineHub.GameDialogue.DaveRemarks[entry.Value].ReachedDisplayLimit())
                 {
                     encounteredLoddleTypes.Add(entry.Key);
                 }
             }
-            encounteredLoddleTypes.Sort();
-        }
-
-        public static void UpdateEncounteredLoddleTypes(GameEvent e)
-        {
-            LoddleMetPlayer ev = (LoddleMetPlayer)e;
-            if (ev.loddleType != LoddleAI.LoddleType.Offspring && ev.loddleType != LoddleAI.LoddleType.Scene && !encounteredLoddleTypes.Contains(ev.loddleType))
-            {
-                encounteredLoddleTypes.Add(ev.loddleType);
-            }
-            UpdateEncounteredLoddleTypes();
+            return encounteredLoddleTypes;
         }
 
         public static void AddNonBiomeManager()

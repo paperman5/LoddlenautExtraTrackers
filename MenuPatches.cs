@@ -34,6 +34,8 @@ namespace ExtraTrackers
             // Update the global cleaned progress
             currentBiomeTextMesh.text = "Global Progress";
             float globalPollutionAmount = ExtraTrackersMod.GetGlobalPollutionAmount();
+            //ExtraTrackersMod.log.LogInfo(globalPollutionAmount);
+            //ExtraTrackersMod.log.LogInfo(Mathf.FloorToInt((1f - globalPollutionAmount) * 100f).ToString());
             __instance.cleanText.text = ScriptLocalization.Biome_Menu.Clean_Amount.Replace("{PERCENT}", Mathf.FloorToInt((1f - globalPollutionAmount) * 100f).ToString());
             int pollutionStage = (int)Mathf.Ceil(globalPollutionAmount * (__instance.biomeHealthColors.Count() - 1));
             __instance.cleanText.color = __instance.biomeHealthColors[pollutionStage];

@@ -123,6 +123,8 @@ namespace ExtraTrackers
             nonBiomeManager.biomeIndex = NON_BIOME_INDEX;
             nonBiomeManager.pollutionPerLitterPickup = 1.0f;
             nonBiomeManager.pollutionPerLitterChunk = 1.0f;
+            nonBiomeManager.litterContributionToBiomePollution = 0.3f;
+            nonBiomeManager.plasticCloudContributionToBiomePollution = 0.15f;
         }
 
         public static void FixNonBiomeGoop()
@@ -163,14 +165,10 @@ namespace ExtraTrackers
         public static int GetGoopyLoddlesCount()
         {
             int goopyLoddles = 0;
-            foreach (int bi in biomePollution.Keys)
+            LoddleAI[] loddles = UnityEngine.Object.FindObjectsByType<LoddleAI>(FindObjectsSortMode.None);
+            foreach (LoddleAI loddle in loddles)
             {
-                BiomeManager bm;
-                bm = bi != -1 ? EngineHub.BiomeSaver.LookUpBiomeByID(bi) : nonBiomeManager;
-                foreach (LoddleAI loddle in bm.loddlesInBiome)
-                {
-                    goopyLoddles += loddle.isGoopy ? 1 : 0;
-                }
+                goopyLoddles += loddle.isGoopy ? 1 : 0;
             }
             return goopyLoddles;
         }

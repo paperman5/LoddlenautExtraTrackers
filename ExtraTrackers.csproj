@@ -108,6 +108,9 @@
     <Reference Include="Sirenix.Utilities">
       <HintPath>lib\Sirenix.Utilities-publicized.dll</HintPath>
     </Reference>
+    <Reference Include="Unity.Postprocessing.Runtime">
+      <HintPath>lib\Unity.Postprocessing.Runtime-publicized.dll</HintPath>
+    </Reference>
     <Reference Include="Unity.TextMeshPro">
       <HintPath>lib\Unity.TextMeshPro-publicized.dll</HintPath>
     </Reference>

@@ -7,15 +7,20 @@ using System;
 using System.Collections.Generic;
 using System.Reflection;
 using UnityEngine;
+using UnityEngine.Rendering.PostProcessing;
 using TMPro;
 using Unity.IL2CPP.CompilerServices;
 using System.Drawing.Printing;
+using SCPE;
+using Cinemachine;
+using System.Collections;
 
 namespace ExtraTrackers
 {
     public static class ExtraTrackersMod
     {
         public const int NON_BIOME_INDEX = -1;
+        public static int screenshotIndex = 0;
         public static ManualLogSource log;
 
         public static Dictionary<int, Dictionary<string, float>> biomePollution = new Dictionary<int, Dictionary<string, float>>();
@@ -173,22 +178,109 @@ namespace ExtraTrackers
             return goopyLoddles;
         }
 
-        //[HarmonyPatch(typeof(GameManager), nameof(GameManager.Update))]
-        //[HarmonyPostfix]
-        //public static void Update_Postfix()
-        //{
-        //    if (Input.GetKeyDown(KeyCode.F3))
-        //    {
-        //        foreach (int bi in biomePollution.Keys)
-        //        {
-        //            BiomeManager bm;
-        //            bm = bi != -1 ? EngineHub.BiomeSaver.LookUpBiomeByID(bi) : nonBiomeManager;
-        //            log.LogInfo(bm.biomeDisplayName);
-        //            log.LogInfo($"goop: {biomePollution[bi]["goopPollution"]}");
-        //            log.LogInfo($"plastic: {biomePollution[bi]["plasticCloudPollution"]}");
-        //            log.LogInfo($"litter: {biomePollution[bi]["litterPollution"]}");
-        //        }
-        //    }
-        //}
+        public static void SetupForScreenshots()
+        {
+            float viewDist = 2000f;
+            float orthoSize = 200f;
+
+            EngineHub.GameManager.globalShaderVariables.GlobalDepthDimDistance = 100000f;
+            EngineHub.GameManager.globalShaderVariables.CullShrinkDistance = 100000f;
+
+            EngineHub.SkyManager.defaultWorldSMD.intensity = 0f;
+            EngineHub.SkyManager.defaultWorldSMD.noiseStrength= 0f;
+            EngineHub.SkyManager.defaultWorldSMD.topExponent = 0f;
+            EngineHub.SkyManager.defaultWorldSMD.bottomExponent = 0f;
+            EngineHub.SkyManager.sunShaftEnableHeight = 10000f;
+
+            EngineHub.PlayerTransforms.controllerRootTransform.parent.Find("Cameras/Main Camera/AmbientFloatyBits").gameObject.SetActive(false);
+            EngineHub.PlayerTransforms.controllerRootTransform.parent.Find("PostProcessingVolume").gameObject.GetComponent<PostProcessVolume>().profile.RemoveSettings<SCPE.Fog>();
+            EngineHub.PlayerTransforms.controllerRootTransform.gameObject.GetComponent<PlayerMeterManager>().enabled = false;
+            EngineHub.PlayerTransforms.controllerRootTransform.parent.Find("Cameras/CM FreeLook").gameObject.GetComponent<CinemachineFreeLook>().m_Lens = new LensSettings(70f, orthoSize, 0.2f, viewDist, 0f);
+
+            GameObject.Find("/HomeCove/PortalVolume_HomeCove").SetActive(false);
+            foreach (BiomeManager bm in EngineHub.BiomeSaver.allBiomes.Values)
+            {
+                bm.pollutedPostVolume.profile.RemoveSettings<SCPE.Fog>();
+                bm.cleanPostVolume.profile.RemoveSettings<SCPE.Fog>();
+                bm.pollutedHazeSphereParticles.gameObject.SetActive(false);
+                bm.cleanSMD.intensity = 0f;
+                bm.cleanSMD.noiseStrength = 0f;
+                bm.cleanSMD.topExponent = 0f;
+                bm.cleanSMD.bottomExponent = 0f;
+                bm.pollutedSMD.intensity = 0f;
+                bm.pollutedSMD.noiseStrength = 0f;
+                bm.pollutedSMD.topExponent = 0f;
+                bm.pollutedSMD.bottomExponent = 0f;
+            }
+            GameObject.Find("/GrimyGulf/Buildings/RefineryTower/PortalVolume_GrimyGulfRefinery").SetActive(false);
+            GameObject.Find("/FlotsamFlats/Boats/GUPPITanker/PortalVolume_FlotsamFlatsShipwreck").SetActive(false);
+            GameObject.Find("/HomeCove/HomeCoveSunShafts").SetActive(false);
+
+            EngineHub.GPUPrefabManager.SetLODBias(viewDist, null);
+            foreach (GPUInstancer.GPUInstancerPrototype prototype in EngineHub.GPUPrefabManager.prototypeList)
+            {
+                prototype.maxDistance = viewDist;
+            }
+
+            ScannerObject[] scannerObjects = UnityEngine.Object.FindObjectsByType<ScannerObject>(FindObjectsSortMode.None);
+            foreach (ScannerObject so in scannerObjects)
+            {
+                if (so.gameObject.name.Contains("Goop") || so.gameObject.name.Contains("Crate") || so.gameObject.name.Contains("Spaceship") || so.gameObject.name.Contains("RechargeRing"))
+                {
+                    so.canGetScanned = false;
+                }
+            }
+            LitterScanner ls = UnityEngine.Object.FindObjectsByType<LitterScanner>(FindObjectsSortMode.None)[0];
+            ls.currentScanRange = viewDist;
+        }
+
+        public static void SaveRenderTextureToPNG(RenderTexture toSave, string filepath)
+        {
+            RenderTexture oldActive = RenderTexture.active;
+            Texture2D image = new Texture2D(toSave.width, toSave.height, TextureFormat.RGB24, true);
+            RenderTexture.active = toSave;
+            image.ReadPixels(new Rect(0, 0, toSave.width, toSave.height), 0, 0);
+            image.Apply();
+            RenderTexture.active = oldActive;
+            toSave.Release();
+            System.IO.File.WriteAllBytes(filepath, image.EncodeToPNG());
+            log.LogInfo("Saved screenshot to " + filepath);
+        }
+
+        public static string GetScreenshotFilepath()
+        {
+            string screenshotDir = Application.persistentDataPath + "/screenshots";
+            var baseDir = new System.IO.DirectoryInfo(screenshotDir);
+            string prefix = DateTime.Now.ToString("yyyy-MM-dd_");
+            string name = baseDir.FullName + "/" + prefix + screenshotIndex.ToString() + ".png";
+            screenshotIndex += 1;
+            return name;
+        }
+
+        public static IEnumerator TakeScreenshot()
+        {
+            RenderTexture camPreviousRT = Camera.main.targetTexture;
+            RenderTexture scaledRenderTexture = new RenderTexture(7680, 4320, 32, RenderTextureFormat.ARGB32);
+            Camera.main.targetTexture = scaledRenderTexture;
+            yield return null;
+            yield return new WaitForEndOfFrame();
+            string filepath = GetScreenshotFilepath();
+            SaveRenderTextureToPNG(scaledRenderTexture, filepath);
+            Camera.main.targetTexture = camPreviousRT;
+        }
+
+        [HarmonyPatch(typeof(GameManager), nameof(GameManager.Update))]
+        [HarmonyPostfix]
+        public static void Update_Postfix(GameManager __instance)
+        {
+            if (Input.GetKeyDown(KeyCode.F3))
+            {
+                SetupForScreenshots();
+            }
+            if (Input.GetKeyDown(KeyCode.F4))
+            {
+                __instance.StartCoroutine(TakeScreenshot());
+            }
+        }
     }
 }

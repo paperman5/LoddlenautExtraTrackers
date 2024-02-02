@@ -205,6 +205,15 @@ namespace ExtraTrackers
             {
                 __instance.StartCoroutine(StartTrackingCoroutine(__instance));
             }
+            [HarmonyPatch(nameof(Pickup.OnDestroy))]
+            [HarmonyPostfix]
+            public static void OnDestroy_Postfix(Pickup __instance)
+            {
+                if (__instance.surroundingBiome == null && nonBiomeManager != null)
+                {
+                    nonBiomeManager.StopTrackingPickupLitter(__instance.gameObject);
+                }
+            }
         }
     }
 }

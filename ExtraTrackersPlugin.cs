@@ -15,7 +15,7 @@ namespace ExtraTrackers
     {
         public const string myGUID = "com.paperish.extratrackers";
         public const string pluginName = "Extra Trackers";
-        public const string versionString = "1.1.0";
+        public const string versionString = "1.1.1";
 
         private static readonly Harmony harmony = new Harmony(myGUID);
         private void Awake()

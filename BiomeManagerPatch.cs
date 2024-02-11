@@ -264,6 +264,7 @@ namespace ExtraTrackers
                 float weightedPlasticPollution = (__instance.maxPlasticCloudPollution > 0f) ? (__instance.currentPlasticCloudPollution / __instance.maxPlasticCloudPollution * __instance.plasticCloudContributionToBiomePollution) : 0f;
                 __instance.biomePollution = weightedGoopPollution + __instance.weightedLitterPollution + weightedPlasticPollution;
                 __instance.biomePollution = BloopTools.SnapToZero(__instance.biomePollution, 1E-06f);
+                ExtraTrackersMod.nonBiomeIsComplete = __instance.biomePollution < 1E-06f;
                 if (skipEffects)
                 {
                     __instance.externalPollutionUpdateQueued = true;

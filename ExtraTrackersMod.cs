@@ -4,6 +4,7 @@ using HarmonyLib;
 using HarmonyLib.Tools;
 using I2.Loc;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
 using UnityEngine;
@@ -21,6 +22,12 @@ namespace ExtraTrackers
         public static Dictionary<int, Dictionary<string, float>> biomePollution = new Dictionary<int, Dictionary<string, float>>();
 
         public static BiomeManager nonBiomeManager;
+
+        // For autosplitter tracking
+        public static bool nonBiomeIsComplete = false;
+        public static bool allHoloBadgesFound = false;
+        public static bool allLoddleTypesFound = false;
+        public static bool allGoopyLoddlesCleaned = false;
 
         public static Dictionary<LoddleAI.LoddleType, string> typeRemarkMapping = new Dictionary<LoddleAI.LoddleType, string>()
         {
@@ -162,6 +169,10 @@ namespace ExtraTrackers
             return BloopTools.SnapToZero(totalPollution, 1E-06f);
         }
 
+        public static void GetGoopyLoddlesCount(GameEvent e)
+        {
+            allGoopyLoddlesCleaned = GetGoopyLoddlesCount() == 0;
+        }
         public static int GetGoopyLoddlesCount()
         {
             int goopyLoddles = 0;
@@ -173,22 +184,23 @@ namespace ExtraTrackers
             return goopyLoddles;
         }
 
-        //[HarmonyPatch(typeof(GameManager), nameof(GameManager.Update))]
-        //[HarmonyPostfix]
-        //public static void Update_Postfix()
-        //{
-        //    if (Input.GetKeyDown(KeyCode.F3))
-        //    {
-        //        foreach (int bi in biomePollution.Keys)
-        //        {
-        //            BiomeManager bm;
-        //            bm = bi != -1 ? EngineHub.BiomeSaver.LookUpBiomeByID(bi) : nonBiomeManager;
-        //            log.LogInfo(bm.biomeDisplayName);
-        //            log.LogInfo($"goop: {biomePollution[bi]["goopPollution"]}");
-        //            log.LogInfo($"plastic: {biomePollution[bi]["plasticCloudPollution"]}");
-        //            log.LogInfo($"litter: {biomePollution[bi]["litterPollution"]}");
-        //        }
-        //    }
-        //}
+        public static void OnHoloBadgeCollected(GameEvent e)
+        {
+            allHoloBadgesFound = ((HoloBadgeCollected)e).allHaveBeenCollected;
+        }
+
+        public static void OnLoddleMetPlayer(GameEvent e)
+        {
+            EngineHub.GameProgressTracker.StartCoroutine(ExtraTrackersMod.UpdateAllLoddleTypesFound());
+        }
+
+        public static IEnumerator UpdateAllLoddleTypesFound()
+        {
+            for (int i = 0; i < 2; i++)
+            {
+                yield return new WaitForEndOfFrame();
+            }
+            allLoddleTypesFound = GetEncounteredLoddleTypes().Count == typeRemarkMapping.Count;
+        }
     }
 }

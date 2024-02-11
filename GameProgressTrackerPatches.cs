@@ -24,5 +24,14 @@ namespace ExtraTrackers
             }
             return true;
         }
+
+        [HarmonyPatch(nameof(GameProgressTracker.RegisterForEvents))]
+        [HarmonyPostfix]
+        public static void RegisterForEvents_Postfix(GameProgressTracker __instance)
+        {
+            EngineHub.EventManager.Register<LoddleGotClean>(new GameEvent.Handler(ExtraTrackersMod.GetGoopyLoddlesCount));
+            EngineHub.EventManager.Register<HoloBadgeCollected>(new GameEvent.Handler(ExtraTrackersMod.OnHoloBadgeCollected));
+            EngineHub.EventManager.Register<LoddleMetPlayer>(new GameEvent.Handler(ExtraTrackersMod.OnLoddleMetPlayer));
+        }
     }
 }

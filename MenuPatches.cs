@@ -231,6 +231,11 @@ namespace ExtraTrackers
             string version = versionLabel.text;
             versionLabel.text = $"{version}\n{ExtraTrackersPlugin.pluginName} v{ExtraTrackersPlugin.versionString}";
             versionLabel.alignment = TextAlignmentOptions.BottomRight;
-        }
+
+            ExtraTrackersMod.nonBiomeIsComplete = false;
+            ExtraTrackersMod.allHoloBadgesFound = false;
+            ExtraTrackersMod.allLoddleTypesFound = false;
+            ExtraTrackersMod.allGoopyLoddlesCleaned = false;
+    }
     }
 }
